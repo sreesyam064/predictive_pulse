@@ -1,0 +1,259 @@
+{
+  "best_model": "Logistic Regression",
+  "feature_cols": [
+    "Gender",
+    "Age",
+    "History",
+    "Patient",
+    "TakeMedication",
+    "Severity",
+    "BreathShortness",
+    "VisualChanges",
+    "NoseBleeding",
+    "Whendiagnoused",
+    "Systolic",
+    "Diastolic",
+    "ControlledDiet"
+  ],
+  "stage_names": [
+    "NORMAL",
+    "HYPERTENSION (Stage-1)",
+    "HYPERTENSION (Stage-2)",
+    "HYPERTENSIVE CRISIS"
+  ],
+  "encoders": {
+    "binary_map": {
+      "Yes": 1,
+      "No": 0,
+      "Male": 1,
+      "Female": 0
+    },
+    "age_map": {
+      "18-34": 0,
+      "35-50": 1,
+      "51-64": 2,
+      "65+": 3
+    },
+    "severity_map": {
+      "Mild": 0,
+      "Moderate": 1,
+      "Sever": 2
+    },
+    "diagnosed_map": {
+      "<1 Year": 0,
+      "1 - 5 Years": 1,
+      ">5 Years": 2
+    },
+    "systolic_map": {
+      "100+": 0,
+      "111 - 120": 1,
+      "121 - 130": 2,
+      "130+": 3
+    },
+    "diastolic_map": {
+      "70 - 80": 0,
+      "81 - 90": 1,
+      "91 - 100": 2,
+      "100+": 3,
+      "130+": 4
+    },
+    "stage_map": {
+      "NORMAL": 0,
+      "HYPERTENSION (Stage-1)": 1,
+      "HYPERTENSION (Stage-2)": 2,
+      "HYPERTENSIVE CRISIS": 3
+    },
+    "stage_names": {
+      "0": "NORMAL",
+      "1": "HYPERTENSION (Stage-1)",
+      "2": "HYPERTENSION (Stage-2)",
+      "3": "HYPERTENSIVE CRISIS"
+    }
+  },
+  "model_results": {
+    "Decision Tree": {
+      "Train_accuracy": 100.0,
+      "accuracy": 100.0,
+      "cv_mean": 100.0,
+      "cv_std": 0.0,
+      "generalization": "Overfitted",
+      "status": "Rejected",
+      "color": "red",
+      "reason": "Perfect accuracy signals data memorization. Brittle on real-world clinical variations."
+    },
+    "Random Forest": {
+      "Train_accuracy": 100.0,
+      "accuracy": 100.0,
+      "cv_mean": 100.0,
+      "cv_std": 0.0,
+      "generalization": "Overfitted",
+      "status": "Rejected",
+      "color": "red",
+      "reason": "Ensemble of overfitted trees. Perfect score masks risk on diverse patient populations."
+    },
+    "SVM": {
+      "Train_accuracy": 100.0,
+      "accuracy": 100.0,
+      "cv_mean": 100.0,
+      "cv_std": 0.0,
+      "generalization": "Overfitted",
+      "status": "Rejected",
+      "color": "red",
+      "reason": "High-C RBF kernel memorizes all training points. Fails to generalize to new presentations."
+    },
+    "KNN": {
+      "Train_accuracy": 99.4,
+      "accuracy": 99.2,
+      "cv_mean": 98.8,
+      "cv_std": 0.27,
+      "generalization": "Good",
+      "status": "Considered",
+      "color": "amber",
+      "reason": "High accuracy but sensitive to feature scaling and new patient distributions."
+    },
+    "Logistic Regression": {
+      "Train_accuracy": 97.4,
+      "accuracy": 97.3,
+      "cv_mean": 97.4,
+      "cv_std": 0.56,
+      "generalization": "Excellent",
+      "status": "Selected",
+      "color": "green",
+      "reason": "Best generalization. Consistent CV, no overfitting, interpretable clinical coefficients."
+    },
+    "Ridge Classifier": {
+      "Train_accuracy": 96.3,
+      "accuracy": 95.3,
+      "cv_mean": 95.8,
+      "cv_std": 1.31,
+      "generalization": "Overfitted",
+      "status": "Rejected",
+      "color": "red",
+      "reason": "Good regularization but lower accuracy than Logistic Regression."
+    },
+    "Gaussian Naive Bayes": {
+      "Train_accuracy": 89.7,
+      "accuracy": 88.5,
+      "cv_mean": 89.7,
+      "cv_std": 1.02,
+      "generalization": "Good",
+      "status": "Considered",
+      "color": "amber",
+      "reason": "Feature independence assumption violated in clinical data. Limited accuracy."
+    }
+  },
+  "feature_importance": {
+    "Diastolic": 0.2716,
+    "NoseBleeding": 0.1368,
+    "Patient": 0.1209,
+    "ControlledDiet": 0.1209,
+    "Systolic": 0.0952,
+    "BreathShortness": 0.0757,
+    "TakeMedication": 0.0566,
+    "VisualChanges": 0.0464,
+    "History": 0.0336,
+    "Severity": 0.0155,
+    "Whendiagnoused": 0.0127,
+    "Age": 0.0115,
+    "Gender": 0.0026
+  },
+  "classification_report": {
+    "NORMAL": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 67.0
+    },
+    "HYPERTENSION (Stage-1)": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1-score": 1.0,
+      "support": 130.0
+    },
+    "HYPERTENSION (Stage-2)": {
+      "precision": 1.0,
+      "recall": 0.9166666666666666,
+      "f1-score": 0.9565217391304348,
+      "support": 120.0
+    },
+    "HYPERTENSIVE CRISIS": {
+      "precision": 0.8275862068965517,
+      "recall": 1.0,
+      "f1-score": 0.9056603773584906,
+      "support": 48.0
+    },
+    "accuracy": 0.9726027397260274,
+    "macro avg": {
+      "precision": 0.9568965517241379,
+      "recall": 0.9791666666666666,
+      "f1-score": 0.9655455291222312,
+      "support": 365.0
+    },
+    "weighted avg": {
+      "precision": 0.9773264052905054,
+      "recall": 0.9726027397260274,
+      "f1-score": 0.9732994707092048,
+      "support": 365.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      67,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      130,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      110,
+      10
+    ],
+    [
+      0,
+      0,
+      0,
+      48
+    ]
+  ],
+  "overfitting_analysis": {
+    "rejected": [
+      "Decision Tree",
+      "Random Forest",
+      "SVM"
+    ],
+    "reason": "100% accuracy on medical data = memorization of training patterns, not generalizable learning",
+    "consequences": [
+      "Poor performance on new unseen patient data",
+      "Cannot adapt to clinical presentation variations",
+      "Risk of false confidence in medical decision-making",
+      "Potential patient safety concerns in deployment"
+    ]
+  },
+  "dataset_info": {
+    "source": "patient_data.csv",
+    "total_samples": 1825,
+    "train_samples": 1460,
+    "test_samples": 365,
+    "split_ratio": "80/20",
+    "features": 13,
+    "class_distribution": {
+      "0": 336,
+      "1": 648,
+      "2": 600,
+      "3": 241
+    },
+    "class_names": {
+      "0": "NORMAL",
+      "1": "HYPERTENSION (Stage-1)",
+      "2": "HYPERTENSION (Stage-2)",
+      "3": "HYPERTENSIVE CRISIS"
+    }
+  }
+}

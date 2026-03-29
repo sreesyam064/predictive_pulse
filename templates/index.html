@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Predictive Pulse — Blood Pressure Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+    <!-- url_for() is flask template syntax, dynamically generates correct path, without this css may break in production-->
+  </head>
+  <body>
+    <header class="header">
+      <div class="header-inner">
+        <div class="logo">
+          <div class="logo-pulse">
+            <svg viewBox="0 0 40 24" fill="none">
+              <!--svg means scalable vector graphics-->
+              <path
+                d="M0 12 L6 12 L9 4 L13 20 L17 8 L21 16 L25 12 L40 12"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+          <div>
+            <span class="logo-title">Predictive Pulse</span>
+            <span class="logo-sub">ML Blood Pressure Analysis</span>
+          </div>
+        </div>
+        <nav class="nav">
+          <button class="nav-btn active" onclick="showSection('predict')">
+            Predict
+          </button>
+          <button class="nav-btn" onclick="showSection('models')">
+            Model Performance
+          </button>
+          <button class="nav-btn" onclick="showSection('about')">About</button>
+        </nav>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <div class="hero" id="hero-section">
+      <div class="hero-grid"></div>
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="dot"></span>AI-Powered • 1,825 Real Patient Records
+        </div>
+        <h1 class="hero-title">Blood Pressure<br /><em>Risk Assessment</em></h1>
+        <p class="hero-desc">
+          Powered by <strong>Logistic Regression</strong> — selected for
+          excellent generalization over 100%-accuracy overfitted models. Trained
+          on real patient clinical data.
+        </p>
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-num" id="stat-acc">97.3%</span
+            ><span class="stat-label">Model Accuracy</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-num">1,825</span
+            ><span class="stat-label">Real Patients</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-num">7</span
+            ><span class="stat-label">ML Algorithms</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat">
+            <span class="stat-num">4</span
+            ><span class="stat-label">BP Stages</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREDICT SECTION -->
+    <section id="section-predict">
+      <main class="main">
+        <section class="card form-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <h2 class="card-title">Patient Assessment Form</h2>
+              <p class="card-sub">
+                13 clinical paramenets . Logistic Regression . Real Patient
+                dataset
+              </p>
+            </div>
+            <button class="btn-demo" onclick="fillDemo()">
+              Load Demo Patient
+            </button>
+          </div>
+
+          <div class="form-body">
+            <!-- 01 Demographics -->
+            <div class="form-section-label">
+              <span class="section-num">01</span>Demographics
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Gender</label>
+                <select id="gender">
+                  <option value="">Select</option>
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Age Group</label>
+                <select id="age">
+                  <option value="">Select</option>
+                  <option value="0">18 — 34</option>
+                  <option value="1">35 — 50</option>
+                  <option value="2">51 — 64</option>
+                  <option value="3">65+</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 02 Blood Pressure-->
+            <div class="form-section-label">
+              <span class="section-num">02</span>Blood Pressure Readings
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Systolic BP <span class="unit">mmHg</span></label>
+                <select id="systolic">
+                  <option value="">Select</option>
+                  <option value="0">100+ (Low/baseline)</option>
+                  <option value="1">111 — 120</option>
+                  <option value="2">121 — 130</option>
+                  <option value="3">130+ (Elevated)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Diastolic BP <span class="unit">mmHg</span></label>
+                <select id="diastolic">
+                  <option value="">Select</option>
+                  <option value="0">70 — 80 (Normal)</option>
+                  <option value="1">81 — 90</option>
+                  <option value="2">91 — 100</option>
+                  <option value="3">100+ (High)</option>
+                  <option value="4">130+ (Crisis)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 03 Medical History -->
+            <div class="form-section-label">
+              <span class="section-num">03</span>Medical History
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Family History of Hypertension</label>
+                <select id="history">
+                  <option value="">Select</option>
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Existing Hypertension Patient</label>
+                <select id="patient">
+                  <option value="">Select</option>
+                  <option value="0">No (New case)</option>
+                  <option value="1">Yes (Diagnosed)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>When First Diagnosed</label>
+                <select id="when_diagnosed">
+                  <option value="">Select</option>
+                  <option value="0">&lt; 1 Year ago</option>
+                  <option value="1">1 — 5 Years ago</option>
+                  <option value="2">&gt; 5 Years ago</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 04 Symptoms-->
+            <div class="form-section-label">
+              <span class="section-num">04</span>Symptoms & Severity
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Symptom Severity</label>
+                <select id="severity">
+                  <option value="">Select</option>
+                  <option value="0">Mild</option>
+                  <option value="1">Moderate</option>
+                  <option value="2">Severe</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Shortness of Breath</label>
+                <select id="breath_shortness">
+                  <option value="">Select</option>
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Visual Changes</label>
+                <select id="visual_changes">
+                  <option value="">Select</option>
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Nose Bleeding</label>
+                <select id="nose_bleeding">
+                  <option value="">Select</option>
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- 05 Management-->
+            <div class="form-section-label">
+              <span class="section-num">05</span>Current Management
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Taking Antihypertensive Medication</label>
+                <select id="take_medication">
+                  <option value="">Select</option>
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Following Controlled Diet</label>
+                <select id="controlled_diet">
+                  <option value="">Select</option>
+                  <option value="0">No</option>
+                  <option value="1">Yes</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <!-- /form-body-->
+
+          <div class="form-footer">
+            <div class="disclaimer">
+              <svg
+                viewBox="0 0 16 16"
+                width="14"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <circle cx="8" cy="8" r="7" />
+                <path d="M8 7v4M8 5h.01" />
+              </svg>
+              Clinical decision support only. Not a substitute for professional
+              medical advice.
+            </div>
+            <button
+              class="btn-predict"
+              id="predict-btn"
+              type="button"
+              onclick="runPrediction()"
+            >
+              <span class="btn-icon">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="18"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+              </span>
+              Analyze Blood Pressure
+            </button>
+          </div>
+        </section>
+
+        <!-- RESULT PANEL -->
+
+        <section class="result-panel" id="result-panel" style="display: none">
+          <div class="result-header" id="result-header">
+            <div class="result-icon-wrap">
+              <span id="result-icon" class="result-icon">—</span>
+            </div>
+            <div class="result-title-group">
+              <div class="result-label">Prediction Result</div>
+              <h2 id="result-stage" class="result-stage">—</h2>
+              <div class="result-urgency" id="result-urgency">—</div>
+            </div>
+            <div class="result-badge-wrap">
+              <div class="result-badge" id="result-risk">—</div>
+              <div class="result-model-tag" id="result-model-tag">—</div>
+            </div>
+          </div>
+          <p id="result-description" class="result-description">—</p>
+          <div class="bp-range-row">
+            <div class="bp-range-card">
+              <span class="bp-range-label">Systolic Range</span>
+              <span class="bp-range-val" id="res-systolic">—</span>
+              <span class="bp-range-unit">mmHg</span>
+            </div>
+            <div class="bp-range-card">
+              <span class="bp-range-label">Diastolic Range</span>
+              <span class="bp-range-val" id="res-diastolic">—</span>
+              <span class="bp-range-unit">mmHg</span>
+            </div>
+          </div>
+          <div class="prob-section">
+            <h3 class="section-heading">Stage Probability Distribution</h3>
+            <div id="prob-bars" class="prob-bars"></div>
+          </div>
+          <div class="risk-section" id="risk-section" style="display: none">
+            <h3 class="section-heading">Identified Risk Factors</h3>
+            <div id="risk-factors-list" class="risk-factors-list"></div>
+          </div>
+          <div class="reco-section">
+            <h3 class="section-heading">Clinical Recommendations</h3>
+            <ul id="recommendations-list" class="recommendations-list"></ul>
+          </div>
+          <button class="btn-new" onclick="resetForm()">
+            &larr; New Assessment
+          </button>
+        </section>
+      </main>
+    </section>
+
+    <!-- MODEL PERFORMANCE SECTION -->
+    <section class="models-section" id="section-models" style="display: none">
+      <div class="section-inner">
+        <h2 class="section-title">Model Performance & Overfitting Analysis</h2>
+        <p class="section-desc">
+          7 supervised learning algorithms evaluated on 1,825 real patient
+          records. Models achieving 100% accuracy are flagged as overfitted and
+          rejected — perfect accuracy in medical ML is a warning sign, not a
+          goal.
+        </p>
+        <div id="overfitting-table"></div>
+        <h3 class="section-heading" style="margin: 2.5rem 0 1rem">
+          Individual Model Cards
+        </h3>
+        <div id="model-grid" class="model-grid"></div>
+        <div id="feature-imp-section"></div>
+      </div>
+    </section>
+
+    <!-- ABOUT SECTION-->
+    <section class="about-section" id="section-about" style="display: none">
+      <div class="section-inner">
+        <h2 class="section-title">About Prediction Pulse</h2>
+        <div class="about-grid">
+          <div class="about-card">
+            <div class="about-icon">📊</div>
+            <h3>Real Dataset</h3>
+            <p>
+              Trained on <strong>1,825 real patient records</strong> with 13
+              clinical features including BP readings, symptoms, medication
+              status, and medical history. 80/20 train-test split with
+              stratified sampling.
+            </p>
+          </div>
+          <div class="about-card">
+            <div class="about-icon">🤖</div>
+            <h3>Why Logistic Regression</h3>
+            <p>
+              Decision Tree, Random Forest, and SVM all achieved 100% — a
+              classic overfiting indicator. LR's 97.3% with excellent
+              cross-validation stability makes it the clinically safe,
+              generalizable choice.
+            </p>
+          </div>
+          <div class="about-card">
+            <div class="about-icon">🩺</div>
+            <h3>BP Classification Stages</h3>
+            <ul class="stage-list">
+              <li>
+                <span class="s-dot" style="background: #10b981"></span>Normal
+                (systolic &lt;120, diastolic &lt;80)
+              </li>
+              <li>
+                <span class="s-dot" style="background: #f97316"></span>Stage 1
+                (130—139 / 80—89)
+              </li>
+              <li>
+                <span class="s-dot" style="background: #ef4444"></span>Stage 2
+                (&ge; 140 / &ge; 90)
+              </li>
+              <li>
+                <span class="s-dot" style="background: #dc2626"></span>Crisis
+                (&ge; 180 / &ge; 120)
+              </li>
+            </ul>
+          </div>
+          <div class="about-card">
+            <div class="about-icon">⚙️</div>
+            <h3>Tech Stack</h3>
+            <div class="tech-tags">
+              <span>Python 3.12</span>
+              <span>Flask</span>
+              <span>scikit-learn</span>
+              <span>Pandas</span>
+              <span>Numpy</span>
+              <span>Joblib</span>
+              <span>Docker</span>
+              <span>Github Actions</span>
+              <span>Render.com</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="scenarios">
+          <h3 class="section-heading" style="margin-bottom: 1.5rem">
+            Clinical Scenarios
+          </h3>
+          <div class="scenario-cards">
+            <div class="scenario">
+              <div class="sc-num">01</div>
+              <h4>Hypertensive Patient Monitoring</h4>
+              <p>
+                Continuous risk assessment for diagnosed patients —
+                guidingtreatment adjustments and monitoring frequency.
+              </p>
+            </div>
+            <div class="scenario">
+              <div class="sc-num">02</div>
+              <h4>Preventive Health Screening</h4>
+              <p>
+                Routine screening for at-risk populations to identify stage 1
+                candidates for early lifestyle intervention.
+              </p>
+            </div>
+            <div class="scenario">
+              <div class="sc-num">03</div>
+              <h4>Emergency Department Triage</h4>
+              <p>
+                Rapid triage for cardiovascular complaints — identifying
+                hypertensive crisis requiring immediate intervention.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- /about-section-->
+
+    <footer class="footer">
+      <div class="footer-inner">
+        <div class="footer-logo">
+          <svg viewBox="0 0 40 24" fill="none" width="36">
+            <path
+              d="M0 12 L6 12 L9 4 L13 20 L17 8 L21 16 L25 12 L40 12"
+              stroke="#c084fc"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          Predictive Pulse
+        </div>
+        <p class="footer-text">
+          ⚠️ Educational and research purposes only. Always consult a licensed
+          healthcare professional.
+        </p>
+      </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  </body>
+</html>
