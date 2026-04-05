@@ -1,8 +1,8 @@
-FROM python:3.12-slim
+FROM docker.io/library/python:3.12.4-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc curl \ 
-    && rm -rrf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -16,4 +16,4 @@ EXPOSE 5000
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
-CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5000", "--workers", "2", "--timeout", "120"]
+CMD ["gunicorn", "app:app", "--bind", "0.0.0.0:5000", "--workers", "1", "--timeout", "120"]
