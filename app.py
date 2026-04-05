@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY")
+app.secret_key = os.getenv("SECRET_KEY", "dev-secret")
 if not app.secret_key:
     raise ValueError("No SECRET_KEY set for Flask application!")
 
@@ -18,6 +18,9 @@ MODEL_DIR = os.getenv("MODEL_DIR") or os.path.join(BASE_DIR, 'models')
 MODEL_PATH = os.getenv("MODEL_PATH") or os.path.join(MODEL_DIR, 'best_model.pkl')
 SCALER_PATH = os.getenv("SCALER_PATH") or os.path.join(MODEL_DIR, 'scaler.pkl')
 METADATA_PATH = os.getenv("METADATA_PATH") or os.path.join(MODEL_DIR, 'metadata.json')
+
+best_model = None
+scaler = None
 
 try:
     best_model = joblib.load(MODEL_PATH)
@@ -246,4 +249,6 @@ def health():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    debug_mode = os.environ.get('FLASK_DEBUG', 'false').lower() in ['true', '1', 'True']
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)
