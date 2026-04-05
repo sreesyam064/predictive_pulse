@@ -3,6 +3,8 @@
 env/
 venv/
 __pycache__/
+.pytest_cache/
+
 
 models/*.pkl
 data/hypertension_train.csv

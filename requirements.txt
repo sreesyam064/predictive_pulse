@@ -8,3 +8,4 @@ seaborn==0.12.2
 matplotlib==3.8.2
 python-dotenv==1.0.0
 pytest==8.0.0
+pyarrow
