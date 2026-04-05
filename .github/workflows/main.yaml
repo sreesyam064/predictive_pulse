@@ -170,7 +170,7 @@ job:
       # RENDER_DEPLOY_HOOK_URL must be set in GitHub Secrets
       - name: Trigger Render deployment
         run: |
-        if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]]; then
+        if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
           echo "RENDER_DEPLOY_HOOK_URL not set — skipping deploy"
           exit 0
         fi
