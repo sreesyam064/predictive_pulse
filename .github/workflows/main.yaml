@@ -165,24 +165,23 @@ job:
     if: github.event_name == 'push'
 
     steps:
-
       # Trigger Render deployment via webhook
       # RENDER_DEPLOY_HOOK_URL must be set in GitHub Secrets
       - name: Trigger Render deployment
         run: |
-        if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
-          echo "RENDER_DEPLOY_HOOK_URL not set — skipping deploy"
-          exit 0
-        fi
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL not set — skipping deploy"
+            exit 0
+          fi
 
-        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
-          -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}")
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}")
 
-        if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "201" ]; then
-          echo "Render deployment triggered (HTTP $HTTP_STATUS)"
-        else
-          echo "Warning: deploy hook returned HTTP $HTTP_STATUS"
-        fi
+          if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "201" ]; then
+            echo "Render deployment triggered (HTTP $HTTP_STATUS)"
+          else
+            echo "Warning: deploy hook returned HTTP $HTTP_STATUS"
+          fi
 
       - name: Print deployment summary
         run: |
