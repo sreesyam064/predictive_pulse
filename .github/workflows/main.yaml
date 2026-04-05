@@ -13,7 +13,7 @@ env:
 # JOB 1: TEST — Runs on every push AND every pull request
 # lint, train, run test_api.py, verify artifacts
 
-job:
+jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
