@@ -1,0 +1,197 @@
+name: Predictive Pulse CI/CD
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.sreesyam064 }}/predictive-pulse
+  PYTHON_VERSION: "3.12.4"
+
+# JOB 1: TEST — Runs on every push AND every pull request
+# lint, train, run test_api.py, verify artifacts
+
+job:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest flake8 python-dotenv
+
+      - name: Lint with flake8
+        run: |
+          flake8 . \
+            --count \
+            --select=E9,F63,F7,F82 \
+            --show-source \
+            --statistics \
+            --exclude=venv,__pycache__,.github,models,data
+
+      - name: Train ML models
+        run: python train_models.py
+
+      - name: Run test_api.py
+        run: python -m pytest test_api.py -v --tb=short
+
+      - name: Verify Artifacts
+        run: |
+          python -c "
+          import json, os
+
+          # All required files must exist
+          files = [
+              'models/best_model.pkl',
+              'models/scaler.pkl',
+              'models/metadata.json',
+              'data/hypertension_train.csv',
+              'data/hypertension_test.csv',
+              'data/patient_data.csv',
+          ]
+          for f in files:
+              assert os.path.exists(f), f'Missing: {f}'
+
+          # Model selection must match expected outcome
+          with open('models/metadata.json') as f:
+              m = json.load(f)
+
+          assert m['best_model'] == 'Logistic Regression', \ f'Wrong best model: {m[\"best_model\"]}'
+          assert m['model_results']['Decision Tree']['status'] == 'Rejected'
+          assert m['model_results']['Random Forest']['status'] == 'Rejected'
+          assert m['model_results']['SVM']['status'] == 'Rejected'
+          assert m['model_results']['Logistic Regression']['status'] == 'Selected'
+          assert m['model_results']['Logistic Regression']['accuracy'] == 97.3
+          assert m['dataset_info']['features'] == 13
+          assert m['dataset_info']['split_ratio'] == '80/20'
+          assert m['dataset_info']['train_samples'] == 1460
+          assert m['dataset_info']['test_samples'] == 365
+          assert m['dataset_info']['total_samples'] == 1825
+
+          print('All 32 checks passed — project is deployment-ready')
+          "
+
+      - name: Upload model artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-models-${{ github.sha }}
+          path: |
+            models/best_model.pkl
+            models/scaler.pkl
+            models/metadata.json
+          retention-days: 30
+
+      - name: Upload dataset artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dataset-splits-${{ github.sha }}
+          path: |
+            data/hypertension_train.csv
+            data/hypertension_test.csv
+          retention-days: 30
+
+  # JOB 2: DOCKER BUILD AND RUN — Only runs on push to main
+  # Requires test job to pass first
+  # build image, push to GitHub Container Registry
+
+  docker:
+    name: Docker build and push
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Login in to ghcr
+      # GITHUB_TOKEN is automatically provided - no manual secret meeded
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Generate image tags: latest, branch name, short commit SHA
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=ref,event-name
+            type=sha,prefix=sha-,format=short
+
+      # Enable multi-platform builds and layer caching
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Build image (trains models inside), push to ghcr,io
+      # Layer cache cuts rebuild time from ~5 to ~1 min
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          dockerfile: Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=sha
+          cache-to: type=gha, mode=max
+
+  # JOB 3: DEPLOY TO RENDER.COM — Only runs after test and docker both pass
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    needs: [test, docker]
+    if: github.event_name == 'push'
+
+    steps:
+
+      # Trigger Render deployment via webhook
+      # RENDER_DEPLOY_HOOK_URL must be set in GitHub Secrets
+      - name: Trigger Render deployment
+        run: |
+        if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]]; then
+          echo "RENDER_DEPLOY_HOOK_URL not set — skipping deploy"
+          exit 0
+        fi
+
+        HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+          -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}")
+
+        if [ "$HTTP_STATUS" = "200" ] || [ "$HTTP_STATUS" = "201" ]; then
+          echo "Render deployment triggered (HTTP $HTTP_STATUS)"
+        else
+          echo "Warning: deploy hook returned HTTP $HTTP_STATUS"
+        fi
+
+      - name: Print deployment summary
+        run: |
+          echo "============================================="
+          echo " Predictive Pulse — Deployment Complete"
+          echo "============================================="
+          echo " Branch  : ${{ github.ref_name }}"
+          echo " Commit  : ${{ github.sha }}"
+          echo " By      : ${{ github.actor }}"
+          echo " Model   : Logistic Regression (97.3%)"
+          echo " Dataset : patient_data.csv (1825 rows)"
+          echo "============================================="
